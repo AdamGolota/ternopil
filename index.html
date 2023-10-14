@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.27/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.27/"></script>
+    <style>
+        html,
+        body,
+        #viewDiv {
+          padding: 0;
+          margin: 0;
+          height: 100%;
+          width: 100%;
+        }
+      </style>
+</head>
+<body>
+    <div id="anonymousPanel" style="display: block; padding: 5px; text-align: center;">
+      <span id="sign-in" class="action">Sign In</span>
+    </div>
+    <div id="viewDiv"></div>
+    <script>
+        require([
+            "esri/config",
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/identity/OAuthInfo",
+            "esri/identity/IdentityManager",
+            "esri/layers/FeatureLayer",
+        ], (esriConfig, Map, MapView, OAuthInfo, esriId, FeatureLayer, ArcGISDynamicMapServiceLayer) => {
+            const personalPanelElement = document.getElementById("personalizedPanel");
+            const anonPanelElement = document.getElementById("anonymousPanel");
+            const userIdElement = document.getElementById("userId");
+
+            const info = new OAuthInfo({
+                appId: "SHnkiEtthsrOamOr",
+                portalUrl: "https://lun22966c305c951.maps.arcgis.com",
+                flowType: "auto",
+                popup: false
+            });
+            esriId.registerOAuthInfos([info]);
+
+            esriId.checkSignInStatus(info.portalUrl + "/sharing").then(() => {
+                displayItems();
+            }).catch(() => {});
+            document.getElementById("sign-in").addEventListener("click", () => {
+                esriId.getCredential(info.portalUrl + "/sharing");
+            });
+
+            function displayItems() {
+                const map = new Map({
+                    basemap: "arcgis-topographic"
+                });
+                const view = new MapView({
+                    map: map,
+                    center: [25.592547, 49.550017], // Longitude, latitude
+                    zoom: 13,
+                    container: "viewDiv"
+                });
+
+                const summary = new FeatureLayer(
+                    "https://services8.arcgis.com/51scd5piRJ1fpTGa/arcgis/rest/services/Pharms_Analyzed_3/FeatureServer/0"
+                );
+
+                const pharms = new FeatureLayer({
+                    url: "https://services8.arcgis.com/51scd5piRJ1fpTGa/arcgis/rest/services/My_Ternopil_Copy/FeatureServer/1"
+                });
+
+                map.add(summary);
+                map.add(pharms);
+            };
+        });
+    </script>
+</body>
+</html>
